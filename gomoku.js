@@ -1,4 +1,5 @@
 let fs = require('fs')
+let childprocess = require('child_process')
 let VM = require('vm2').NodeVM
 
 class Gomoku {
@@ -7,7 +8,7 @@ class Gomoku {
     this.init()
     this.matchHistory = []
     this.goal = 5
-    this.players = [];
+    this.players = []
   }
 
   init() {
@@ -16,25 +17,30 @@ class Gomoku {
     this.turnHistory = []
   }
 
-  add(player) {
+  async add(player) {
     if (this.players.length >= 2) throw 'too many players!'
-    //this.players.push(player)
-
-    let vm = new VM({
-      timeout: 1000,
-      sandbox: {
-        bot: player,
-        player: {}
-      },
-      wrapper: 'none',
+    if (!fs.existsSync(player)) throw 'file not found! ' + player
+    
+    let proc = childprocess.spawn('node', ['harness', player], {
+      stdio: ['pipe', 'pipe', 'inherit']
     })
 
-    vm.run(`player = new bot()`)
+    proc.stdout.setEncoding('utf8')
 
-    this.players.push(vm)
+    let info = await this.message(proc, {
+      type: 'getInfo'
+    })
+
+    console.log(info)
+    
+    proc.name = info.name
+    proc.author = info.author
+
+    console.log('loaded ' + info.name + ' by ' + info.author)
+    this.players.push(proc)
   }
 
-  playSet(n) {
+  async playSet(n) {
     this.matchHistory = []
     let starting = 0
 
@@ -43,33 +49,33 @@ class Gomoku {
       let hash = player.name + ' (' + player.author + ')'
       let data = store[hash]
       if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
-
-      console.log(player.run('return player'))//.beforeSet(store)
     })
 
     for (let i = 0; i < n; i++) {
-      var matchResult = this.playMatch(starting)
+      var matchResult = await this.playMatch(starting)
       this.matchHistory.push(matchResult)
       starting++
       starting %= this.players.length
     }
 
-    this.players.forEach(player => {
+    for(let player of this.players) {
       let hash = player.name + ' (' + player.author + ')'
-      let data = player.run(`return player`).afterSet()
+      let data = await this.message(player, {
+        type: 'afterSet'
+      })
       if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
 
       store[hash] = data
-    })
+    }
 
     fs.writeFileSync('./store/store.json', JSON.stringify(store, null, 2), 'UTF-8')
   }
 
-  playMatch(startingPlayer) {
+  async playMatch(startingPlayer) {
     this.init()
     this.currentPlayer = startingPlayer
     while (true) {
-      this.turn()
+      await this.turn()
 
       let result = this.check()
       if (result != null) return {
@@ -92,14 +98,22 @@ class Gomoku {
     }
   }
 
-  turn() {
-    let move = this.players[this.currentPlayer].run(`return player`).play(
-      this.board.slice(),
-      this.turnHistory.slice(),
-      this.matchHistory.slice(),
-      this.size,
-      this.goal
-    )
+  async turn() {
+    // let move = this.players[this.currentPlayer].run(`return player`).play(
+    //   this.board.slice(),
+    //   this.turnHistory.slice(),
+    //   this.matchHistory.slice(),
+    //   this.size,
+    //   this.goal
+    // )
+    let move = await this.message(this.players[this.currentPlayer], {
+      type: 'play',
+      board: this.board.slice(),
+      turnHistory: this.turnHistory.slice(),
+      matchHistory: this.matchHistory.slice(),
+      size: this.size,
+      goal: this.goal
+    })
 
     if (move.hasOwnProperty('x') && Number.isInteger(move.x)
       && move.hasOwnProperty('y') && Number.isInteger(move.y)
@@ -176,12 +190,14 @@ class Gomoku {
     }
 
     let winnerDetails = winner == -1 ? {} : {
-      name: this.players[winner].run(`return player`).name,
-      author: this.players[winner].run(`return player`).author,
+      name: this.players[winner].name,
+      author: this.players[winner].author,
     }
 
-    let winPercentage = (maxWins / (this.matchHistory.length - draws)).toFixed(3)
-    winPercentage -= (winPercentage % 0.001)
+    let winPercentage = (maxWins / (this.matchHistory.length - draws))
+    winPercentage *= 100
+    winPercentage = Math.round(winPercentage)
+    winPercentage /= 100
 
     return {
       wins: wins,
@@ -190,6 +206,19 @@ class Gomoku {
       winPercentage: winPercentage,
       winnerDetails: winnerDetails,
     }
+  }
+
+  dismantle() {
+    for(process of this.players) process.kill()
+  }
+
+  async message(player, message) {
+    return new Promise(function (resolve, reject) {
+      player.stdin.write(JSON.stringify(message) + '\n')
+      player.stdout.once('data', data => {
+        resolve(JSON.parse(data))
+      })
+    })
   }
 }
 

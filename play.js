@@ -1,19 +1,24 @@
-
-
-let bot1 = require('./' + process.argv[2])
-let bot2 = require('./' + process.argv[3])
+let bot1 = process.argv[2]
+let bot2 = process.argv[3]
 
 let gomoku = new (require('./gomoku'))()
 
-gomoku.add(bot1)
-gomoku.add(bot2)
-
-let n = 1
-console.time(n + ' games')
-gomoku.playSet(n)
-console.timeEnd(n + ' games')
 
 
-let stats = gomoku.stats()
+async function run() {
+  await gomoku.add(bot1)
+  await gomoku.add(bot2)
+  let n = 100
+  console.time(n + ' games')
+  await gomoku.playSet(n)
+  console.timeEnd(n + ' games')
 
-console.log(stats)
+  let stats = gomoku.stats()
+
+  console.log(stats)
+  gomoku.dismantle()
+}
+
+run()
+
+setTimeout(() => { }, 1000)

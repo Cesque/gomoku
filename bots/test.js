@@ -18,7 +18,23 @@ class RandomBot {
     
   }
 
+  // -- executes at the start of a game session --
+  // perform any setup here
+  beforeSet() {
+
+  }
+
+  // -- executes at the start of a match --
+  // perform any setup here
+  beforeMatch() {
+
+  }
+
   play(board, turnHistory, matchHistory, size, goal) {
+    while (true) {
+      
+    }
+    
     if (turnHistory.length == 0) {
       return {
         x: Math.floor(size/2),
