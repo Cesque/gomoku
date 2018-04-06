@@ -1,6 +1,5 @@
 let fs = require('fs')
 let childprocess = require('child_process')
-let VM = require('vm2').NodeVM
 
 class Gomoku {
   constructor() {
