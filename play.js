@@ -3,12 +3,10 @@ let bot2 = process.argv[3]
 
 let gomoku = new (require('./gomoku'))()
 
-
-
 async function run() {
   await gomoku.add(bot1)
   await gomoku.add(bot2)
-  let n = 100
+  let n = 1000
   console.time(n + ' games')
   await gomoku.playSet(n)
   console.timeEnd(n + ' games')
@@ -20,5 +18,3 @@ async function run() {
 }
 
 run()
-
-setTimeout(() => { }, 1000)

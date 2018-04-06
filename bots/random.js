@@ -8,7 +8,7 @@ class RandomBot {
   // perform any setup here
   // the `store` object contains any data added to it previously in the `afterSet` function
   // or added to it in the web editor
-  beforeSet(store) {
+  beforeSet(id, size, goal, store) {
     
   }
     
@@ -18,7 +18,7 @@ class RandomBot {
     
   }
 
-  play(board, turnHistory, matchHistory, size, goal) {
+  play(board, turnHistory, matchHistory, size, goal, id) {
     if (turnHistory.length == 0) {
       return {
         x: Math.floor(size/2),

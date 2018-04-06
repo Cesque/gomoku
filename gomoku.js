@@ -20,7 +20,7 @@ class Gomoku {
   async add(player) {
     if (this.players.length >= 2) throw 'too many players!'
     if (!fs.existsSync(player)) throw 'file not found! ' + player
-    
+
     let proc = childprocess.spawn('node', ['harness', player], {
       stdio: ['pipe', 'pipe', 'inherit']
     })
@@ -32,9 +32,10 @@ class Gomoku {
     })
 
     console.log(info)
-    
+
     proc.name = info.name
     proc.author = info.author
+    proc.id = this.players.length + 1
 
     console.log('loaded ' + info.name + ' by ' + info.author)
     this.players.push(proc)
@@ -45,26 +46,35 @@ class Gomoku {
     let starting = 0
 
     let store = JSON.parse(fs.readFileSync('./store/store.json', 'UTF-8'))
-    this.players.forEach(player => {
+    for (let player of this.players) {
       let hash = player.name + ' (' + player.author + ')'
       let data = store[hash]
       if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
-    })
+
+      await this.message(player, {
+        type: 'beforeSet',
+        id: player.id,
+        size: this.size,
+        goal: this.goal,
+        store: data,
+      })
+    }
 
     for (let i = 0; i < n; i++) {
+      console.log(i)
       var matchResult = await this.playMatch(starting)
       this.matchHistory.push(matchResult)
       starting++
       starting %= this.players.length
     }
 
-    for(let player of this.players) {
+    for (let player of this.players) {
       let hash = player.name + ' (' + player.author + ')'
       let data = await this.message(player, {
-        type: 'afterSet'
+        type: 'afterSet',
       })
-      if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
 
+      if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
       store[hash] = data
     }
 
@@ -74,14 +84,32 @@ class Gomoku {
   async playMatch(startingPlayer) {
     this.init()
     this.currentPlayer = startingPlayer
+
+    for (let player of this.players) {
+      await this.message(player, {
+        type: 'beforeMatch',
+      })
+    }
+
     while (true) {
       await this.turn()
 
       let result = this.check()
-      if (result != null) return {
-        winner: result,
-        turns: this.turnHistory.slice(),
-        board: this.board.slice()
+      if (result != null) {
+        let ret = {
+          winner: result,
+          turns: this.turnHistory.slice(),
+          board: this.board.slice()
+        }
+
+        for (let player of this.players) {
+          await this.message(player, {
+            type: 'afterMatch',
+            match: ret,
+          })
+        }  
+
+        return ret
       }
 
       if (this.board.every(column => column.every(val => val != 0))) {
@@ -99,20 +127,9 @@ class Gomoku {
   }
 
   async turn() {
-    // let move = this.players[this.currentPlayer].run(`return player`).play(
-    //   this.board.slice(),
-    //   this.turnHistory.slice(),
-    //   this.matchHistory.slice(),
-    //   this.size,
-    //   this.goal
-    // )
     let move = await this.message(this.players[this.currentPlayer], {
       type: 'play',
-      board: this.board.slice(),
-      turnHistory: this.turnHistory.slice(),
-      matchHistory: this.matchHistory.slice(),
-      size: this.size,
-      goal: this.goal
+      lastTurn: this.turnHistory.length == 0 ? { start: true } : this.turnHistory[this.turnHistory.length - 1],
     })
 
     if (move.hasOwnProperty('x') && Number.isInteger(move.x)
@@ -128,7 +145,7 @@ class Gomoku {
       this.turnHistory.push(moveObj)
       this.board[move.y][move.x] = this.currentPlayer + 1
 
-      //log(this.board.map(x => x.join(' ')).join('\n'))
+      //console.log(this.board.map(x => x.join(' ')).join('\n'))
 
     } else {
       //invalid move
@@ -209,7 +226,7 @@ class Gomoku {
   }
 
   dismantle() {
-    for(process of this.players) process.kill()
+    for (process of this.players) process.kill()
   }
 
   async message(player, message) {

@@ -8,7 +8,7 @@ class bot {
   // perform any setup here
   // the `store` object contains any data added to it previously in the `afterSet` function
   // or added to it in the web editor
-  beforeSet(store) {
+  beforeSet(id, size, goal, store) {
     
   }
 

@@ -30,7 +30,7 @@ class RandomBot {
 
   }
 
-  play(board, turnHistory, matchHistory, size, goal) {
+  play(board, turnHistory, matchHistory, size, goal, id) {
     while (true) {
       
     }
