@@ -13,12 +13,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cesque/gomoku-test.git"
+    "url": "git+https://github.com/Cesque/gomoku.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Cesque/gomoku-test/issues"
+    "url": "https://github.com/Cesque/gomoku/issues"
   },
-  "homepage": "https://github.com/Cesque/gomoku-test#readme"
+  "homepage": "https://github.com/Cesque/gomoku#readme"
 }
