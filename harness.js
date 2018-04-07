@@ -1,6 +1,6 @@
 class BotHarness {
   constructor(botname) {
-    let Bot = require('./' + botname)
+    let Bot = require(botname)
     this.bot = new Bot()
     this.board = undefined
     this.turnHistory = []
