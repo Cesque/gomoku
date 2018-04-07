@@ -229,7 +229,10 @@ class Gomoku {
   }
 
   dismantle() {
-    for (process of this.players) process.kill()
+    
+    for (let proc of this.players) {
+      proc.kill()
+    }
   }
 
   async message(player, message) {
