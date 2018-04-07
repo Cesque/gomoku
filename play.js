@@ -6,7 +6,7 @@ let gomoku = new (require('./gomoku'))()
 async function run() {
   await gomoku.add(bot1, 'some GUID 1', {})
   await gomoku.add(bot2, 'some GUID 2', {})
-  let n = 100
+  let n = 10
   console.time(n + ' games')
   let stores = await gomoku.playSet(n)
   console.timeEnd(n + ' games')
