@@ -214,6 +214,11 @@ class Gomoku {
       author: this.players[winner].author,
     }
 
+    let loserDetails = winner == -1 ? {} : {
+      name: this.players[(winner + 1) % this.players.length].name,
+      author: this.players[(winner + 1) % this.players.length].author,
+    }
+
     let winPercentage = (maxWins / (this.matchHistory.length - draws))
     winPercentage *= 100
     winPercentage = Math.round(winPercentage)
@@ -225,6 +230,8 @@ class Gomoku {
       winner: winner + 1,
       winPercentage: winPercentage,
       winnerDetails: winnerDetails,
+      loserDetails: loserDetails,
+      matches: this.matchHistory
     }
   }
 
