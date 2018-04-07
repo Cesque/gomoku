@@ -17,7 +17,7 @@ class Gomoku {
     this.turnHistory = []
   }
 
-  async add(player) {
+  async add(player, dbID, store) {
     if (this.players.length >= 2) throw 'too many players!'
     if (!fs.existsSync(player)) throw 'file not found! ' + player
 
@@ -33,9 +33,13 @@ class Gomoku {
 
     console.log(info)
 
+    proc.dbID = dbID
     proc.name = info.name
     proc.author = info.author
     proc.id = this.players.length + 1
+
+    if (store == undefined || (typeof store != 'Object') || Array.isArray(store)) store = {}
+    proc.store = store
 
     console.log('loaded ' + info.name + ' by ' + info.author)
     this.players.push(proc)
@@ -45,18 +49,13 @@ class Gomoku {
     this.matchHistory = []
     let starting = 0
 
-    let store = JSON.parse(fs.readFileSync('./store/store.json', 'UTF-8'))
     for (let player of this.players) {
-      let hash = player.name + ' (' + player.author + ')'
-      let data = store[hash]
-      if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
-
       await this.message(player, {
         type: 'beforeSet',
         id: player.id,
         size: this.size,
         goal: this.goal,
-        store: data,
+        store: player.store,
       })
     }
 
@@ -69,16 +68,20 @@ class Gomoku {
     }
 
     for (let player of this.players) {
-      let hash = player.name + ' (' + player.author + ')'
       let data = await this.message(player, {
         type: 'afterSet',
       })
 
       if (data == undefined || (typeof data != 'Object') || Array.isArray(data)) data = {}
-      store[hash] = data
+      player.store = data
     }
 
-    fs.writeFileSync('./store/store.json', JSON.stringify(store, null, 2), 'UTF-8')
+    return this.players.map(player => {
+      return {
+        id: player.dbID,
+        store: player.store
+      }
+    })
   }
 
   async playMatch(startingPlayer) {
