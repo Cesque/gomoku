@@ -1,6 +1,6 @@
 {
   "name": "@cesque/gomoku",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "",
   "main": "gomoku.js",
   "dependencies": {
