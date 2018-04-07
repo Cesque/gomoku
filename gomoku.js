@@ -3,11 +3,11 @@ let childprocess = require('child_process')
 let path = require('path')
 
 class Gomoku {
-  constructor() {
-    this.size = 5
+  constructor(size, goal) {
+    this.size = size || 19
+    this.goal = goal || 5
     this.init()
     this.matchHistory = []
-    this.goal = 5
     this.players = []
   }
 
