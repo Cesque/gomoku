@@ -1,5 +1,6 @@
 let fs = require('fs')
 let childprocess = require('child_process')
+let path = require('path')
 
 class Gomoku {
   constructor() {
@@ -20,7 +21,7 @@ class Gomoku {
     if (this.players.length >= 2) throw 'too many players!'
     if (!fs.existsSync(player)) throw 'file not found! ' + player
 
-    let proc = childprocess.spawn('node', ['harness', player], {
+    let proc = childprocess.spawn('node', [path.resolve(__dirname, './harness'), player], {
       stdio: ['pipe', 'pipe', 'inherit']
     })
 
@@ -106,7 +107,7 @@ class Gomoku {
             type: 'afterMatch',
             match: ret,
           })
-        }  
+        }
 
         return ret
       }
