@@ -187,6 +187,7 @@ class Gomoku {
         if (check2(x, y, 1, 0)) return this.board[y][x]
         if (check2(x, y, 0, 1)) return this.board[y][x]
         if (check2(x, y, 1, 1)) return this.board[y][x]
+        if (check2(x, y, -1, 1)) return this.board[y][x]
       }
     }
 

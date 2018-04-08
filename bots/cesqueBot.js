@@ -1,7 +1,7 @@
 class bot {
   constructor() {
-    this.name = 'test bot' // replace this with the name of your bot
-    this.author = 'author name' // replace this with your name
+    this.name = 'cesque bot' // replace this with the name of your bot
+    this.author = 'cesque' // replace this with your name
   }
 
    // -- executes at the start of a game session --
@@ -26,9 +26,31 @@ class bot {
   // }
   play(board, turnHistory, matchHistory, size, goal, id) {
 
+
+
     return {
       x: 0,
       y: 0,
+    }
+  }
+
+  checkForPossibleWins(board, size, goal, id) {
+    let g = ''
+    for (let i = 0; i < goal; i++) g += (id + '')
+    for (let i = 0; i < size; i++) {
+      let s = this.slice(0, i, 0, 1, size).join('')
+      let found = s.indexOf('0' + g)
+
+      if(found != )
+    }
+  }
+
+  slice(board, x, y, dx, dy, count) {
+    let s = []
+    for (let i = 0; i < count; i++) {
+      s += board[y][x]
+      y += dy
+      x += dx
     }
   }
 
