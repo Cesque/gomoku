@@ -43,7 +43,7 @@ class BotHarness {
         if (!data.lastTurn.start) {
           let lastTurn = data.lastTurn
           this.board[lastTurn.move.y][lastTurn.move.x] = lastTurn.player
-          this.turnHistory.push(data.move)
+          this.turnHistory.push(data.lastTurn)
         }
         
         let move = this.bot.play(this.board, this.turnHistory, this.matchHistory, this.size, this.goal, this.id)

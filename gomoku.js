@@ -60,7 +60,7 @@ class Gomoku {
     }
 
     for (let i = 0; i < n; i++) {
-      console.log(i)
+      //console.log(i)
       var matchResult = await this.playMatch(starting)
       this.matchHistory.push(matchResult)
       starting++
@@ -148,7 +148,7 @@ class Gomoku {
       this.turnHistory.push(moveObj)
       this.board[move.y][move.x] = this.currentPlayer + 1
 
-      //console.log(this.board.map(x => x.join(' ')).join('\n'))
+      //console.log(this.board.map(x => x.join(' ')).join('\n') + '\n')
 
     } else {
       //invalid move
@@ -158,7 +158,7 @@ class Gomoku {
         message: 'invalid move!'
       }
 
-      console.log(move)
+      //console.log((this.currentPlayer + 1) + ': ' + JSON.stringify(move))
       console.log('invalid move made by player ' + (this.currentPlayer + 1))
       console.log()
       this.turnHistory.push(moveObj)
@@ -237,8 +237,7 @@ class Gomoku {
     }
   }
 
-  dismantle() {
-    
+  dismantle() {  
     for (let proc of this.players) {
       proc.kill()
     }
